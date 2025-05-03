@@ -97,6 +97,7 @@ def nbuild(dir:str, new_dir:str, *, indent_amount:int=1, erase_dir:bool=None,
         subbuild()
 
  subbuild()
+ print(f'> compiled!\n')
 
 def ncompile(file:str, *, indent_amount:int=1, cythonic:bool=None, tokenlog:bool=False):
   cythonic = _path.splitext(file)[~0] == '.npx' if cythonic is None else cythonic
