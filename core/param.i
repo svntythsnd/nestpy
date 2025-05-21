@@ -1,1 +1,1 @@
-{'test': False, 'version': '0.3.41'}
+{'test': False, 'version': '0.3.42'}
