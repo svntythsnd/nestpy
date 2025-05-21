@@ -92,7 +92,7 @@ def ncompile(code:str, *, indent_amount:int=1, cythonic:bool=False, tokenlog:boo
   # TOKEN DECLARATIONS
 
   def sclund(regex):
-    return r'\b' + regex + r'_*\b'
+    return r'\b' + r'\n*'.join(regex) + r'_*\b'
 
   macros = {}
 
@@ -390,6 +390,7 @@ pass\n{indent * indent_level}')
                                         and compilable()) else token.symb
         if compilable():
           if TokenTypes.APPENDSUB in token.types:
+            mtoken = mtoken.replace('\n','')
             mtoken += '_'
           if TokenTypes.SHORTHAND in token.types:
             mtoken += ' '
