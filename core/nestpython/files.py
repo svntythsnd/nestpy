@@ -1,5 +1,5 @@
 from os import mkdir as _mkdir
-from os import path as _path
+import os.path as _path
 from os import walk as _walk
 from os import scandir as _scandir
 from os import chdir as _chdir
@@ -105,4 +105,6 @@ def ncompile(file:str, *, indent_amount:int=1, cythonic:bool=None, tokenlog:bool
     return _m.ncompile(f.read(), indent_amount=indent_amount, cythonic=cythonic, tokenlog=tokenlog, filename=file)
 
 def nexec(file:str, *, indent_amount:int=1, cythonic:bool=None, tokenlog:bool=False):
+  from . import imports as importHandler
+  del importHandler
   exec(ncompile(file, indent_amount=indent_amount, cythonic=cythonic, tokenlog=tokenlog))

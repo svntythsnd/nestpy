@@ -27,6 +27,8 @@ After importing;
         - `tokenlog=False`: determines if tokenization progress should be logged.
         - `new_file:str=None`: determines where to compile a source file. Reverts to the original filename with a .py(x) extension if unspecified.
 
+Alternatively, importing nestPython files directly after importing `nestpython.imports` or the entire library into a normal python file works too.
+
 Use `.npy` for nestPython files, `.npx` for nestCython files.
 
 # FEATURING:

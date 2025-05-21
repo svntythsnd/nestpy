@@ -4,6 +4,10 @@ def ncompile(code:str, *, indent_amount:int=1, cythonic:bool=False, tokenlog:boo
   from collections.abc import Iterable
   from enum import Enum
 
+  # canonicalize line breaks
+
+  code = code.replace('\r\n', '\n').replace('\r', '\n')
+
   # ----------------- #
   #      TOKENS       #
   # ----------------- #
