@@ -108,7 +108,7 @@ The `#` is ignored by the transpiler.
 - For block comments, use `/*`, `*/`.
 - For line comments, use `//`.
 - Block and line comments will be ignored during transpilation.
-- For comments that need to be cpiled into python ones, use `/|`, `|\ `.
+- For comments that need to be cpiled into python ones, use `/|`, `|/`.
 
 ## macros
 
