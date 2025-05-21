@@ -91,8 +91,11 @@ def ncompile(code:str, *, indent_amount:int=1, cythonic:bool=False, tokenlog:boo
 
   # TOKEN DECLARATIONS
 
+  def linesafe(regex):
+    return r'\n*'.join(regex)
+
   def sclund(regex):
-    return r'\b' + r'\n*'.join(regex) + r'_*\b'
+    return r'\b' + linesafe(regex) + r'_*\b'
 
   macros = {}
 
@@ -106,31 +109,32 @@ def ncompile(code:str, *, indent_amount:int=1, cythonic:bool=False, tokenlog:boo
     stringSingle = Token(r"'", TokenTypes.STRING)
     dictIndentLeft = Token(r'-{', TokenTypes.MAP)
     dictIndentRight = Token(r'}-', TokenTypes.MAP)
-    indentLeftDouble = Token(r'{{')
+    indentLeftDouble = Token(r'{\n*{')
+    indentRightDouble = Token(r'}\n*}')
     indentSelfClose = Token(r'{\s*(\/\/.*\n\s*|\/\*[\s\S]\*\/\s*)*}', TokenTypes.INDENTED, TokenTypes.SYNTACTICAL)
     indentNoColonSelfClose = Token(r'~{\s*(\/\/.*\n\s*|\/\*[\s\S]\*\/\s*)*}', TokenTypes.INDENTED, TokenTypes.SYNTACTICAL)
     indentLeftNoColon = Token(r'~{', TokenTypes.INDENTED, TokenTypes.SYNTACTICAL)
     indentLeft = Token(r'{', TokenTypes.INDENTED, TokenTypes.SYNTACTICAL)
     indentRight = Token(r'}', TokenTypes.INDENTED, TokenTypes.SYNTACTICAL)
     newline = Token(r'\n', TokenTypes.INDENTED, TokenTypes.MULTILINE, TokenTypes.NEWLINELIKE)
-    returnShorthand = Token(r'=>', TokenTypes.SHORTHAND)
-    yieldShorthand = Token(r':>', TokenTypes.SHORTHAND)
-    nativeSemicolon = Token(r',,', TokenTypes.MAP)
-    nativeAssignment = Token(r'<-', TokenTypes.MAP)
-    incrementOperator = Token(r'\+\+', TokenTypes.MAP)
-    decrementOperator = Token(r'--', TokenTypes.MAP)
-    andShorthand = Token(r'&&', TokenTypes.SHORTHAND)
-    orShorthand = Token(r'\|\|', TokenTypes.SHORTHAND)
-    isShorthand = Token(r'=&', TokenTypes.SHORTHAND)
-    isNotShorthand = Token(r'!=&', TokenTypes.SHORTHAND)
-    cpdefShorthand = Token(r'~\$=', TokenTypes.SHORTHAND, TokenTypes.CYTHON)
-    cdefShorthand = Token(r'\$=', TokenTypes.SHORTHAND, TokenTypes.CYTHON)
-    defShorthand = Token(r':=(?!>)', TokenTypes.SHORTHAND)
-    returntypeShorthand = Token(r'>:', TokenTypes.SHORTHAND)
-    inShorthand = Token(r'->', TokenTypes.SHORTHAND)
-    notInShorthand = Token(r'!>', TokenTypes.SHORTHAND)
-    delShorthand = Token(r'~>', TokenTypes.SHORTHAND)
-    lambdaShorthand = Token(r';=', TokenTypes.SHORTHAND)
+    returnShorthand = Token(linesafe(r'=>'), TokenTypes.SHORTHAND)
+    yieldShorthand = Token(linesafe(r':>'), TokenTypes.SHORTHAND)
+    nativeSemicolon = Token(linesafe(r',,'), TokenTypes.MAP)
+    nativeAssignment = Token(linesafe(r'<-'), TokenTypes.MAP)
+    incrementOperator = Token(r'\+\n*\+', TokenTypes.MAP)
+    decrementOperator = Token(linesafe(r'--'), TokenTypes.MAP)
+    andShorthand = Token(linesafe(r'&&'), TokenTypes.SHORTHAND)
+    orShorthand = Token(r'\|\n*\|', TokenTypes.SHORTHAND)
+    isShorthand = Token(linesafe(r'=&'), TokenTypes.SHORTHAND)
+    isNotShorthand = Token(linesafe(r'!=&'), TokenTypes.SHORTHAND)
+    cpdefShorthand = Token(r'~\n*\$\n*=', TokenTypes.SHORTHAND, TokenTypes.CYTHON)
+    cdefShorthand = Token(r'\$\n*=', TokenTypes.SHORTHAND, TokenTypes.CYTHON)
+    defShorthand = Token(r':\n*=(?!\n*>)', TokenTypes.SHORTHAND)
+    returntypeShorthand = Token(linesafe(r'>:'), TokenTypes.SHORTHAND)
+    inShorthand = Token(linesafe(r'->'), TokenTypes.SHORTHAND)
+    notInShorthand = Token(linesafe(r'!>'), TokenTypes.SHORTHAND)
+    delShorthand = Token(linesafe(r'~>'), TokenTypes.SHORTHAND)
+    lambdaShorthand = Token(linesafe(r';='), TokenTypes.SHORTHAND)
     indentNewline = Token(r';', TokenTypes.INDENTED, TokenTypes.SYNTACTICAL)
     notShorthand = Token(r'!(?!=)', TokenTypes.SHORTHAND)
     andDeconflict = Token(sclund('and'), TokenTypes.APPENDSUB)
@@ -149,8 +153,8 @@ def ncompile(code:str, *, indent_amount:int=1, cythonic:bool=False, tokenlog:boo
     passDeconflict = Token(sclund('pass'), TokenTypes.APPENDSUB)
     comment = Token(r'\/\*[\s\S]*?\*\/', TokenTypes.INDENTED)
     lineComment = Token(r'\/\/.*', TokenTypes.INDENTED)
-    lineStatement = Token(r'\/\|.*?\|\\', TokenTypes.INDENTED)
-    intDiv = Token(r'~/', TokenTypes.MAP)
+    lineStatement = Token(r'\/\|.*?\|\/', TokenTypes.INDENTED)
+    intDiv = Token(linesafe(r'~/'), TokenTypes.MAP)
     caseShorthand = Token(r'\?', TokenTypes.SHORTHAND)
     macroDefine = Token(r'#\s*[\w\n]+\s*#![\s\S]*?!#', TokenTypes.MACROS)
     macroUndefine = Token(r'#~\s*[\w\n]+\s*~#', TokenTypes.MACROS)
@@ -188,13 +192,13 @@ def ncompile(code:str, *, indent_amount:int=1, cythonic:bool=False, tokenlog:boo
 
   def isF(token, ptoken):
     with contextlib.suppress(TypeError):
-      return (TokenTypes.STRING in token.types) and (ptoken.symb[~0].lower() == 'f' or
-                                                     ptoken.symb[~1:].lower() == 'fr')
+      return (TokenTypes.STRING in token.types) and (ptoken.symb[-1].lower() == 'f' or
+                                                     ptoken.symb[-2:].lower() == 'fr')
 
   def isR(token, ptoken):
     with contextlib.suppress(TypeError):
-      return (TokenTypes.STRING in token.types) and (ptoken.symb[~0].lower() == 'r' or
-                                                     ptoken.symb[~1:].lower() == 'rf')
+      return (TokenTypes.STRING in token.types) and (ptoken.symb[-1].lower() == 'r' or
+                                                     ptoken.symb[-2:].lower() == 'rf')
 
   def isEscape(token):
     with contextlib.suppress(TypeError):
@@ -214,7 +218,7 @@ def ncompile(code:str, *, indent_amount:int=1, cythonic:bool=False, tokenlog:boo
   indent_level = 0
   string_nesting = []
   def getStringType():
-    return anonToken('') if len(string_nesting) == 0 else string_nesting[~0]
+    return anonToken('') if len(string_nesting) == 0 else string_nesting[-1]
   fstring_nesting = 0
   in_multilineStringSingle = lambda: getStringType().id == Tokens.multilineStringSingle.id and in_string
   in_multilineStringDouble = lambda: getStringType().id == Tokens.multilineStringDouble.id and in_string
@@ -291,10 +295,23 @@ def ncompile(code:str, *, indent_amount:int=1, cythonic:bool=False, tokenlog:boo
         raise breakout
       if in_string and not in_multilineString() and token.id == Tokens.escapeNewline.id:
         continue
-      if (token.id == Tokens.indentLeftDouble.id
-          and not in_fstring):
-        tokens = [Tokens.indentLeft]*2 + tokens[n + 1:]
-        raise breakout
+      if token.id == Tokens.indentLeftDouble.id:
+        if in_fstring:
+          compiled_code += '{{'
+          continue
+        else:
+          tokens = [Tokens.indentLeft]*2 + tokens[n + 1:]
+          raise breakout
+      if token.id == Tokens.indentRightDouble.id:
+        if in_fstring:
+          compiled_code += '}}'
+          continue
+        elif in_multilineString:
+          compiled_code += token.symb
+          continue
+        else:
+          tokens = [Tokens.indentLeft]*2 + tokens[n + 1:]
+          raise breakout
       if token.id == Tokens.indentSelfClose.id:
         if compilable():
           compiled_code = (compiled_code.rstrip()
@@ -311,7 +328,7 @@ pass\n{indent * indent_level}')
        match token.id:
         case Tokens.macroDefine.id:
           macro = (token.symb.split('#', 2)[1].strip().replace('\n', ''), indent_level)
-          sub = token.symb.split('#', 2)[2][1:~1]
+          sub = token.symb.split('#', 2)[2][1:-2]
 
           macros.update({macro: sub})
           continue
@@ -326,7 +343,7 @@ pass\n{indent * indent_level}')
             if (macro, N) in macros:
               truth = True
               break
-          if compiled_code[~0] != ' ' and compiled_code[~0] != '\n':
+          if compiled_code[-1] != ' ' and compiled_code[-1] != '\n':
             compiled_code += ' '
           compiled_code += str(truth) + ' '
           continue
@@ -361,7 +378,7 @@ pass\n{indent * indent_level}')
           case Tokens.indentRight.id:
             indent_level -= 1
             for macro in list(macros):
-              if int(macro[~0]) > indent_level:
+              if int(macro[-1]) > indent_level:
                 macros.pop(macro)
             compiled_code += '\n' + indent * indent_level
           case Tokens.indentNewline.id:
@@ -393,10 +410,13 @@ pass\n{indent * indent_level}')
             mtoken = mtoken.replace('\n','')
             mtoken += '_'
           if TokenTypes.SHORTHAND in token.types:
+            mtoken = mtoken.replace('\n','')
             mtoken += ' '
             if compiled_code != '':
-              if compiled_code[~0] != ' ' and compiled_code[~0] != '\n':
+              if compiled_code[-1] != ' ' and compiled_code[-1] != '\n':
                 compiled_code += ' '
+          if TokenTypes.MAP in token.types:
+            mtoken = mtoken.replace('\n', '')
         compiled_code += (mtoken.lstrip() if (
                            (
                              (
