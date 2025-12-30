@@ -10,7 +10,9 @@ def read(filename):
 
 param = eval(read('param.i'))
 
-version = param['version']
+import nestpython as c
+
+version = c.__version__
 test = param['test']
 
 with open(parse('../README.md'), 'r') as f, open(parse('README.md'), 'w') as fn:
@@ -21,14 +23,26 @@ with open(parse('../README.md'), 'r') as f, open(parse('README.md'), 'w') as fn:
         name='nestpython',
         packages=find_packages(include=['nestpython']),
         version=version,
-        description='python with braces.',
-        author='slycedf',
-        license='MIT',
+        description=c.__description__,
+        author=c.__author__,
+        license=c.__license__,
         long_description=readme,
         long_description_content_type='text/markdown',
+        python_requires=">=3.10",
         classifiers=[
-            "Development Status :: 4 - Beta"
-        ]
+            'Development Status :: 5 - Production/Stable',
+            'Intended Audience :: Developers',
+            'Topic :: Software Development :: Compilers',
+            'Topic :: Software Development :: Libraries :: Python Modules',
+            'Topic :: Education',
+            'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3.10',
+            'Programming Language :: Python :: 3.11',
+            'Programming Language :: Python :: Implementation :: CPython',
+            'License :: OSI Approved :: MIT License',
+            'Operating System :: OS Independent',
+        ],
+        url=c.__url__
     )
 
 token = open(f'D:/slycefolder/ins/nsp/{ {True: "tt", False: "tr"}[test]}', 'r').read()

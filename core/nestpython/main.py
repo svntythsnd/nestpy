@@ -210,9 +210,6 @@ def ncompile(code:str, *, indent_amount:int=1, cythonic:bool=False, tokenlog:boo
   def isNRawEscape(token):
     return isEscape(token) and not in_rstring
 
-  def isNRawEscapedEscape(token):
-    return isEscapedEscape(token) and not in_rstring
-
   compiled_code = ''
   indent_level = 0
   string_nesting = []
@@ -287,7 +284,7 @@ def ncompile(code:str, *, indent_amount:int=1, cythonic:bool=False, tokenlog:boo
           case Tokens.lineStatement.id:
             compiled_code += '#' + token.symb[2:-2].rstrip() + '\n' + indent * indent_level
             continue
-      elif token.id == Tokens.comment.id:
+      elif token.id == Tokens.comment.id or token.id == Tokens.lineComment.id:
         tokens = tokenize(token.symb[0], tokenList(), buffer,
                             tokenlog, filename) + tokenize(token.symb[1:], tokenList(), buffer,
                             tokenlog, filename) + tokens[n + 1:]

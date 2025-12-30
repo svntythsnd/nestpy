@@ -7,31 +7,17 @@ def read(filename):
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--version', type=str,
-                    help='version of distribution')
-
 parser.add_argument('--test', action='store_true',
                     help='testpypi vs. pypi upload')
 
 args = parser.parse_args()
 
-version = '0.0.0'
-
 
 param = eval(read('core/param.i'))
-
-
-try:
-    version = args.version
-except IndexError:
-    pass
-
-if version == '.':
-    version = param['version']
 
 test = args.test
 
 with open('core/param.i', 'w') as f:
-    f.write(str({'test': test, 'version': version}))
+    f.write(str({'test': test}))
 
 runcmd(read('setup.bat'))
